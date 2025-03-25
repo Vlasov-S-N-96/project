@@ -270,17 +270,24 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-<a href="https://github.com/Vlasov-S-N-96/project/tree/main/startde-project/sergej-vlasov-tnb4478">
-  <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
-       alt="Нажми..."
-       style="width: 50px;
-              height: auto;
-              transition: transform 0.2s ease-in-out;
-              cursor: pointer;
-              vertical-align: middle;"  /* Vertically align the image */
-       onmouseover="this.style.transform='scale(1.1)';"
-       onmouseout="this.style.transform='scale(1)';"
-       title="Перейти к документу"
-       />
-  <span style="margin-left: 5px; font-weight: bold;">seller_items</span>
-</a>
+<table>
+  <tr>
+    <td style="padding: 0;">
+      <a href="https://github.com/Vlasov-S-N-96/project/tree/main/startde-project/sergej-vlasov-tnb4478">
+        <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
+             alt="Нажми..."
+             style="width: 40px;
+                    height: auto;
+                    transition: transform 0.2s ease-in-out;
+                    cursor: pointer;"
+             onmouseover="this.style.transform='scale(1.1)';"
+             onmouseout="this.style.transform='scale(1)';"
+             title="Перейти к документу"
+             />
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center;">seller_items</td>
+  </tr>
+</table>
