@@ -193,7 +193,7 @@ def main():
 
 
 
-## 1. количество товаров на которое оформлен возврат 
+## 1. Количество товаров на которое оформлен возврат 
 
 ```python
     item_df = item_df.withColumn("returned_items_count",
@@ -204,48 +204,48 @@ def main():
   <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_1.jpg" alt="Расчет returned_items_count">
 </details>
 
-## 2. потенциальный доход от остатков товаров и товаров в заказе
+## 2. Потенциальный доход от остатков товаров и товаров в заказе
 
 ```python 
                      .withColumn("potential_revenue",
                                  ((F.col("availability_items_count") + (F.col("ordered_items_count")) * F.col("item_price")).cast("bigint")))
 ``` 
 <details>
-  <summary>Показать расчет returned_items_count</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_2.jpg" alt="Расчет returned_items_count">
+  <summary>Показать расчет potential_revenue</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_2.jpg" alt="Расчет potential_revenue">
 </details>
 
-## 3. доход от выполненных заказов с учетом возвратов
+## 3. Доход от выполненных заказов с учетом возвратов
 
 ```python                     
                      .withColumn("total_revenue",
                                  ((F.col("ordered_items_count") - F.col("returned_items_count") + F.col("goods_sold_count")) * F.col("item_price")).cast("bigint"))
 ```
 <details>
-  <summary>Показать расчет returned_items_count</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_3.jpg" alt="Расчет returned_items_count">
+  <summary>Показать расчет total_revenue</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_3.jpg" alt="Расчет total_revenue">
 </details>
 
-## 4. среднее количество продаж с момента запуска 
+## 4. Среднее количество продаж с момента запуска 
 
 ```python   
                      .withColumn("avg_daily_sales",
                                  F.when(F.col("days_on_sell") > 0, (F.col("goods_sold_count") / F.col("days_on_sell"))).otherwise(0).cast("double")) \
 ```
 <details>
-  <summary>Показать расчет returned_items_count</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_4.jpg" alt="Расчет returned_items_count">
+  <summary>Показать расчет avg_daily_sales</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_4.jpg" alt="Расчет avg_daily_sales">
 </details>
 
-## 5. количество дней которое потребуется для продажи всех доступных остатков товара 
+## 5. Количество дней которое потребуется для продажи всех доступных остатков товара 
 
 ```python 
                      .withColumn("days_to_sold",
                                  F.when(F.col("avg_daily_sales") > 0, (F.col("availability_items_count") / F.col("avg_daily_sales"))).otherwise(F.lit(None)).cast("double"))
 ```
 <details>
-  <summary>Показать расчет returned_items_count</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_5.jpg" alt="Расчет returned_items_count">
+  <summary>Показать расчет days_to_sold</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_5.jpg" alt="Расчет days_to_sold">
 </details>
 
 ## 6. Расчет percent_rank относительно рейтинга товара 
@@ -257,8 +257,8 @@ def main():
     item_df = item_df.withColumn("item_rate_percent", F.percent_rank().over(w).cast("double"))
 ```
 <details>
-  <summary>Показать расчет returned_items_count</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_6.jpg" alt="Расчет returned_items_count">
+  <summary>Показать расчет item_rate_percent</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_6.jpg" alt="Расчет item_rate_percent">
 </details>
     
 ```python  
