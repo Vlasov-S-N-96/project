@@ -270,4 +270,15 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-[![нажми..](https://github.com/Vlasov-S-N-96/project/blob/main/icons/document.svg)](https://github.com/Vlasov-S-N-96/project/tree/main/startde-project/sergej-vlasov-tnb4478)
+<a href="https://github.com/Vlasov-S-N-96/project/tree/main/startde-project/sergej-vlasov-tnb4478">
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/icons/document.svg"
+       alt="Нажми..."
+       style="width: 100px; /* Adjust the width as needed */
+              height: auto; /* Maintain aspect ratio */
+              transition: transform 0.2s ease-in-out; /* Smooth transition */
+              cursor: pointer;"
+       onmouseover="this.style.transform='scale(1.1)';"
+       onmouseout="this.style.transform='scale(1)';"
+       title="Перейти к проекту"
+       />
+</a>
