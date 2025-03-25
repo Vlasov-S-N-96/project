@@ -272,22 +272,30 @@ if __name__ == "__main__":
 ```
 <table>
   <tr>
-    <td style="padding: 0;">
+    <td style="padding: 0; text-align: center;">
       <a href="https://github.com/Vlasov-S-N-96/project/tree/main/startde-project/sergej-vlasov-tnb4478">
         <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
              alt="Нажми..."
-             style="width: 40px;
-                    height: auto;
-                    transition: transform 0.2s ease-in-out;
-                    cursor: pointer;"
+             style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
              onmouseover="this.style.transform='scale(1.1)';"
              onmouseout="this.style.transform='scale(1)';"
-             title="Перейти к документу"
-             />
+             title="Перейти к документу" />
       </a>
     </td>
+    <td style="padding: 0; text-align: center;">
+      <a href="https://github.com/Vlasov-S-N-96/project/blob/main/startde-project/de-project/sergej-vlasov-tnb4478/items-spark-job.py">
+        <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
+             alt="Нажми..."
+             style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
+             onmouseover="this.style.transform='scale(1.1)';"
+             onmouseout="this.style.transform='scale(1)';"
+             title="Перейти к документу" />
+      </a>
+    </td>
+
   </tr>
   <tr>
+    <td style="text-align: center;">items-spark-job.py</td>
     <td style="text-align: center;">seller_items</td>
   </tr>
 </table>
