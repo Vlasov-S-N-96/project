@@ -270,4 +270,4 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-[![нажми..]([images/logo.png](https://github.com/Vlasov-S-N-96/project/blob/main/icons/document.svg))](https://github.com/Vlasov-S-N-96/project/tree/main/startde-project/sergej-vlasov-tnb4478)
+[![нажми..](https://github.com/Vlasov-S-N-96/project/blob/main/icons/document.svg)](https://github.com/Vlasov-S-N-96/project/tree/main/startde-project/sergej-vlasov-tnb4478)
