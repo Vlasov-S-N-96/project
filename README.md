@@ -2,7 +2,7 @@
 
 ## Цель проекта
 
-Предоставить аналитикам агрегированные метрики по карточкам товаром, популярным категориям и прочим параметрам на маркетплейсе KarpovZone. Цель также заключается в демонстрации совместной работы DWH (Greenplum), Data Lake (Spark) и Data Orchestrator (Airflow), приближенной к реальной работе Data Engineer.
+Предоставить аналитикам агрегированные метрики по карточкам товаром, популярным категориям и прочим параметрам на маркетплейсе KarpovZone. Цель также заключается в демонстрации совместной работы DWH (Greenplum), Data Lake (Spark) и Data Orchestrator (Airflow).
 
 ## Цель создания витрины данных
 Создание инструментов для упрощения аналитики данных по товарам представленным на площадке KarpovZone.
@@ -37,7 +37,7 @@
 *   **Apache Spark:**  Для обработки и агрегации данных в Data Lake.
 *   **Apache Airflow:**  Для оркестрации ETL-процессов.
 *   **Greenplum:**  В качестве хранилища данных (DWH).
-*   **AWS S3 (или аналогичное):**  Для хранения исходных и промежуточных данных.
+*   **AWS S3 :**  Для хранения исходных и промежуточных данных.
 *   **Git/GitHub:** Для контроля версий кода.
 
 ## Исходные данные
@@ -75,7 +75,7 @@
         *   Python (с библиотеками pandas, PySpark)
     *   Получение доступа к S3 хранилищу `startde-raw` (VK.Cloud).
     *   Настройка подключения к Greenplum хранилищу.
-2.  **Разработка Spark Job (items-spark-job.py):**
+2.  **Разработка Spark Job :**
 
     *   Чтение данных о товарах из S3 бакета `startde-raw/raw_items` в формате Parquet.
     *   Обогащение данных дополнительными параметрами и агрегатами:
@@ -86,7 +86,7 @@
         *   `days_to_sold` (количество дней которое потребуется для продажи всех доступных остатков товара).
         *   `item_rate_percent` (относительный ранг рейтинга товара).
     *   Сохранение результата в формате Parquet в S3 бакет `startde-project/{USER_LOGIN}/seller_items`.
-3.  **Разработка Airflow DAG (startde-project-<student_id>-dag):**
+3.  **Разработка Airflow DAG :**
 
     *   Создание DAG, который выполняет следующие задачи:
         *   Запуск Spark Job (используя `SparkKubernetesOperator`).
@@ -378,8 +378,8 @@ unreliable_sellers_query = """ DROP ViEW IF EXISTS "sergej-vlasov-tnb4478".unrel
                     """
 ```
 <details>
-  <summary>Показать витрину данных sergej-vlasov-tnb4478".unreliable_sellers_view</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_4.jpg" alt="Расчет avg_daily_sales">
+  <summary>Показать VIEW sergej-vlasov-tnb4478".unreliable_sellers_view</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Greenplum%20PXF/create_unreliable_sellers_report_view.jpg" alt="CREATE VIEW sergej-vlasov-tnb4478.unreliable_sellers_view">
 </details>
 
 ```Sql
@@ -397,11 +397,12 @@ item_brands_query = """ DROP ViEW IF EXISTS "sergej-vlasov-tnb4478".item_brands_
                           country"""
 ```
 <details>
-  <summary>Показать витрину данных sergej-vlasov-tnb4478".item_brands_view</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_4.jpg" alt="Расчет avg_daily_sales">
+  <summary>Показать VIEW sergej-vlasov-tnb4478".item_brands_view</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Greenplum%20PXF/create_brands_report_view.jpg" alt="CREATE VIEW sergej-vlasov-tnb4478.item_brands_view">
 </details>
 
-# --- Функции для создания операторов ---
+# Функции для создания операторов
+```Python
 def _build_submit_operator(task_id: str, application_file: str, link_dag):
     """
     Создает и возвращает SparkKubernetesOperator для запуска Spark приложения.
@@ -411,7 +412,7 @@ def _build_submit_operator(task_id: str, application_file: str, link_dag):
         namespace=K8S_SPARK_NAMESPACE,
         application_file=application_file,
         kubernetes_conn_id=K8S_CONNECTION_ID,
-        do_xcom_push=True,  # Push application name в XCom для дальнейшего использования
+        do_xcom_push=True, 
         dag=link_dag
     )
 
@@ -428,15 +429,16 @@ def _build_sensor(task_id: str, application_name: str, link_dag):
         dag=link_dag
     )
 
-# --- DAG Definition ---
 # Аргументы по умолчанию для DAG
 default_args = {
-    "owner": "sergej-vlasov-tnb4478",  # Замените на ваш логин
+    "owner": "sergej-vlasov-tnb4478",  
 }
+```
 
 # Создаем DAG
+```Python 
 with DAG(
-    dag_id="startde-project-sergej-vlasov-tnb4478-dag",  # ID DAG (важно!)
+    dag_id="startde-project-sergej-vlasov-tnb4478-dag",  # ID DAG 
     default_args=default_args,
     schedule_interval=None,  # DAG запускается вручную
     start_date=pendulum.datetime(2025, 3, 3, tz="UTC"),  # Дата начала
@@ -466,14 +468,18 @@ with DAG(
         task_id="items_datamart",
         conn_id=GREENPLUM_ID,  # ID соединения Airflow для Greenplum
         sql=items_datamart_query,  # SQL запрос для создания витрины
-        split_statements=True,  # Разделяем запрос на отдельные стейтменты
-        return_last=False,  # Не возвращаем результат последнего стейтмента
+        split_statements=True,  
+        return_last=False,  
     )
 
-    # --- Порядок задач ---
+   
     # Задачи выполняются последовательно:
     # 1. Запускаем Spark приложение
     # 2. Отслеживаем статус Spark приложения
     # 3. Создаем витрину данных в Greenplum
     submit_task >> sensor_task >> build_datamart
 ```
+<details>
+  <summary>Показать запуск DAGA</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Airflow/Final_project.jpg" alt="DAG">
+</details>
