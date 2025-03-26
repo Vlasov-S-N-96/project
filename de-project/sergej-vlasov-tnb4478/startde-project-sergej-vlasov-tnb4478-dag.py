@@ -42,7 +42,39 @@ items_datamart_query = """DROP EXTERNAL TABLE IF EXISTS "sergej-vlasov-tnb4478".
                     LOCATION ('pxf://startde-project/sergej-vlasov-tnb4478/seller_items?PROFILE=s3:parquet&SERVER=default')
                     ON ALL FORMAT 'CUSTOM' (FORMATTER='pxfwritable_import') ENCODING 'UTF8';"""
 
+unreliable_sellers_query = """ DROP ViEW IF EXISTS "sergej-vlasov-tnb4478".unreliable_sellers_view;
+                    CREATE VIEW "sergej-vlasov-tnb4478".unreliable_sellers_view as
+                    SELECT 
+                        total.seller AS seller,
+                        total.availability_items_count AS total_overload_items_count,
+                        total.availability_items_count > total.ordered_items_count AS is_unreliable
+                    FROM (
+                        SELECT 
+                            s.seller AS seller,
+                            SUM(s.availability_items_count) AS availability_items_count,
+                            SUM(s.ordered_items_count) AS ordered_items_count
+                        FROM 
+                            "sergej-vlasov-tnb4478".seller_items s
+                        WHERE 
+                            s.days_on_sell > 100 
+                        GROUP BY 
+                            s.seller
+                    ) AS total 
+                    """
 
+
+item_brands_query = """ DROP ViEW IF EXISTS "sergej-vlasov-tnb4478".item_brands_view;
+                    CREATE VIEW "sergej-vlasov-tnb4478".item_brands_view as
+                    select brand,
+                    group_type,
+                    country,
+                    sum(potential_revenue) as potential_revenue,
+                    SUM(total_revenue) as total_revenue,
+                    count(sku_id) as items_count
+                    from "sergej-vlasov-tnb4478".seller_items
+                    group by brand,
+                          group_type,
+                          country"""
 
 def _build_submit_operator(task_id: str, application_file: str, link_dag):
     return SparkKubernetesOperator(
@@ -77,6 +109,8 @@ with DAG("startde-project-sergej-vlasov-tnb4478-dag",
          tags=["job_submit"],
          catchup=False) as dag:
 
+
+
     # Определяем задачу SparkKubernetesOperator
 
     submit_task = _build_submit_operator(
@@ -95,8 +129,31 @@ with DAG("startde-project-sergej-vlasov-tnb4478-dag",
     task_id="items_datamart",
     conn_id=GREENPLUM_ID,
     sql=items_datamart_query,
+    autocommit=True,
     split_statements=True,
     return_last=False,
     )
 
-    submit_task >> sensor_task >> build_datamart
+
+    unreliable_sellers_view = SQLExecuteQueryOperator(
+    task_id="create_unreliable_sellers_report_view",
+    conn_id=GREENPLUM_ID,
+    sql=unreliable_sellers_query,
+    autocommit=True,
+    split_statements=True,
+    return_last=False,
+    )
+
+
+    item_brands_view = SQLExecuteQueryOperator(
+    task_id="create_brands_report_view",
+    conn_id=GREENPLUM_ID,
+    sql=item_brands_query,
+    autocommit=True,
+    split_statements=True,
+    return_last=False,
+    )
+
+
+    submit_task >> sensor_task >> build_datamart 
+    build_datamart >> [item_brands_view,unreliable_sellers_view]
