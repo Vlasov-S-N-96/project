@@ -299,3 +299,181 @@ if __name__ == "__main__":
     <td style="text-align: center;">seller_items</td>
   </tr>
 </table>
+
+## Разработка Airflow DAG 
+
+```Python
+import pendulum # для работы с датой и временем (start_date)
+from airflow import DAG # импорт класса DAG
+from airflow.operators.empty import EmptyOperator 
+from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator # запускает Spark приложения в кластере Kubernetes. 
+# Принимает YAML файл с конфигурацией Spark приложения, отправляет его в Kubernetes, и ждет завершения приложения.
+from airflow.providers.cncf.kubernetes.sensors.spark_kubernetes import SparkKubernetesSensor # отслеживать состояние Spark приложения, запущенного в Kubernetes. 
+# Он периодически проверяет статус приложения и переходит к следующей задаче только после того, как приложение успешно завершится.
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+from datetime import datetime
+
+
+K8S_SPARK_NAMESPACE = "de-project"  # Namespace Kubernetes, где будут запускаться Spark приложения
+K8S_CONNECTION_ID = "kubernetes_karpov"  # ID соединения Airflow для подключения к Kubernetes
+GREENPLUM_ID = "greenplume_karpov"  # ID соединения Airflow для подключения к Greenplum
+SUBMIT_NAME = "job_submit"  # task_id для SparkKubernetesOperator
+SENSOR_NAME = "job_sensor"  # task_id для SparkKubernetesSensor
+```
+
+# SQL-запрос для создания витрины данных в Greenplum 
+```Sql
+items_datamart_query = """DROP EXTERNAL TABLE IF EXISTS "sergej-vlasov-tnb4478".seller_items CASCADE;
+                    CREATE EXTERNAL TABLE "sergej-vlasov-tnb4478".seller_items (
+                    sku_id BIGINT,
+                    title TEXT,
+                    category TEXT,
+                    brand  TEXT,
+                    seller TEXT,
+                    group_type TEXT,
+                    country TEXT,
+                    availability_items_count BIGINT,
+                    ordered_items_count BIGINT,
+                    warehouses_count BIGINT,
+                    item_price BIGINT,
+                    goods_sold_count BIGINT,
+                    item_rate FLOAT8,
+                    days_on_sell BIGINT,
+                    avg_percent_to_sold BIGINT,
+                    returned_items_count INTEGER,
+                    potential_revenue BIGINT,
+                    total_revenue BIGINT,
+                    avg_daily_sales FLOAT8,
+                    days_to_sold FLOAT8,
+                    item_rate_percent FLOAT8
+                    )
+                    LOCATION ('pxf://startde-project/sergej-vlasov-tnb4478/seller_items?PROFILE=s3:parquet&SERVER=default')
+                    ON ALL FORMAT 'CUSTOM' (FORMATTER='pxfwritable_import') ENCODING 'UTF8';"""
+```
+<details>
+  <summary>Показать витрину данных sergej-vlasov-tnb4478".seller_items</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Greenplum%20PXF/seller_items_1.jpg" alt="CREATE EXTERNAL TABLE sergej-vlasov-tnb4478.seller_items">
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Greenplum%20PXF/seller_items_2.jpg" alt="CREATE EXTERNAL TABLE sergej-vlasov-tnb4478.seller_items">
+</details>
+
+```Sql
+unreliable_sellers_query = """ DROP ViEW IF EXISTS "sergej-vlasov-tnb4478".unreliable_sellers_view;
+                    CREATE VIEW "sergej-vlasov-tnb4478".unreliable_sellers_view as
+                    SELECT 
+                        total.seller AS seller,
+                        total.availability_items_count AS total_overload_items_count,
+                        total.availability_items_count > total.ordered_items_count AS is_unreliable
+                    FROM (
+                        SELECT 
+                            s.seller AS seller,
+                            SUM(s.availability_items_count) AS availability_items_count,
+                            SUM(s.ordered_items_count) AS ordered_items_count
+                        FROM 
+                            "sergej-vlasov-tnb4478".seller_items s
+                        WHERE 
+                            s.days_on_sell > 100 
+                        GROUP BY 
+                            s.seller
+                    ) AS total 
+                    """
+```
+<details>
+  <summary>Показать витрину данных sergej-vlasov-tnb4478".unreliable_sellers_view</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_4.jpg" alt="Расчет avg_daily_sales">
+</details>
+
+```Sql
+item_brands_query = """ DROP ViEW IF EXISTS "sergej-vlasov-tnb4478".item_brands_view;
+                    CREATE VIEW "sergej-vlasov-tnb4478".item_brands_view as
+                    select brand,
+                    group_type,
+                    country,
+                    sum(potential_revenue) as potential_revenue,
+                    SUM(total_revenue) as total_revenue,
+                    count(sku_id) as items_count
+                    from "sergej-vlasov-tnb4478".seller_items
+                    group by brand,
+                          group_type,
+                          country"""
+```
+<details>
+  <summary>Показать витрину данных sergej-vlasov-tnb4478".item_brands_view</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/py_spark_seller_items/py_spark_raw_items_4.jpg" alt="Расчет avg_daily_sales">
+</details>
+
+# --- Функции для создания операторов ---
+def _build_submit_operator(task_id: str, application_file: str, link_dag):
+    """
+    Создает и возвращает SparkKubernetesOperator для запуска Spark приложения.
+    """
+    return SparkKubernetesOperator(
+        task_id=task_id,
+        namespace=K8S_SPARK_NAMESPACE,
+        application_file=application_file,
+        kubernetes_conn_id=K8S_CONNECTION_ID,
+        do_xcom_push=True,  # Push application name в XCom для дальнейшего использования
+        dag=link_dag
+    )
+
+def _build_sensor(task_id: str, application_name: str, link_dag):
+    """
+    Создает и возвращает SparkKubernetesSensor для отслеживания статуса Spark приложения.
+    """
+    return SparkKubernetesSensor(
+        task_id=task_id,
+        namespace=K8S_SPARK_NAMESPACE,
+        application_name=application_name,
+        kubernetes_conn_id=K8S_CONNECTION_ID,
+        attach_log=True,  # Прикрепляет логи Spark приложения к логам Airflow
+        dag=link_dag
+    )
+
+# --- DAG Definition ---
+# Аргументы по умолчанию для DAG
+default_args = {
+    "owner": "sergej-vlasov-tnb4478",  # Замените на ваш логин
+}
+
+# Создаем DAG
+with DAG(
+    dag_id="startde-project-sergej-vlasov-tnb4478-dag",  # ID DAG (важно!)
+    default_args=default_args,
+    schedule_interval=None,  # DAG запускается вручную
+    start_date=pendulum.datetime(2025, 3, 3, tz="UTC"),  # Дата начала
+    tags=["job_submit"],  # Теги для удобной фильтрации
+    catchup=False,  # Отключаем автоматический запуск пропущенных DAG Runs
+) as dag:
+
+    # --- Операторы ---
+    # 1. SparkKubernetesOperator: Запускает Spark приложение на Kubernetes
+    submit_task = _build_submit_operator(
+        task_id=SUBMIT_NAME,
+        application_file='items_spark_submit.yaml',  # YAML файл с конфигурацией Spark приложения
+        link_dag=dag
+    )
+
+    # 2. SparkKubernetesSensor: Отслеживает статус Spark приложения
+    sensor_task = _build_sensor(
+        task_id=SENSOR_NAME,
+        application_name=(
+            "{{{{task_instance.xcom_pull(task_ids='{SUBMIT_NAME}')['metadata']['name']}}}}"
+        ),  # Получаем имя приложения из XCom (из submit_task)
+        link_dag=dag
+    )
+
+    # 3. SQLExecuteQueryOperator: Создает витрину данных в Greenplum
+    build_datamart = SQLExecuteQueryOperator(
+        task_id="items_datamart",
+        conn_id=GREENPLUM_ID,  # ID соединения Airflow для Greenplum
+        sql=items_datamart_query,  # SQL запрос для создания витрины
+        split_statements=True,  # Разделяем запрос на отдельные стейтменты
+        return_last=False,  # Не возвращаем результат последнего стейтмента
+    )
+
+    # --- Порядок задач ---
+    # Задачи выполняются последовательно:
+    # 1. Запускаем Spark приложение
+    # 2. Отслеживаем статус Spark приложения
+    # 3. Создаем витрину данных в Greenplum
+    submit_task >> sensor_task >> build_datamart
+```
