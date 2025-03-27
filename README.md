@@ -38,11 +38,35 @@
 *   **Apache Airflow:**  Для оркестрации ETL-процессов.
 *   **Greenplum:**  В качестве хранилища данных (DWH).
 *   **AWS S3 :**  Для хранения исходных и промежуточных данных.
-*   **Git/GitHub:** Для контроля версий кода.
+*   **Git/GitHub:** 
 
 ## Исходные данные
 
 Исходные данные размещены в S3 бакете `startde-raw` (VK.Cloud) в формате Parquet. Данные содержат информацию о товарах на маркетплейсе KarpovZone.
+<details>
+  <summary>Посмотреть исходные данные</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Amazon_s3/Amazon_s3.jpg" alt="startde-raw/raw_items">
+</details>
+
+<table style="border-collapse: collapse;">
+  <tr>
+    <td style="padding: 0; text-align: center; border: none;">
+      <a href="https://github.com/Vlasov-S-N-96/project/tree/main/startde-raw/raw_items">
+        <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
+             alt="Нажми..."
+             style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
+             onmouseover="this.style.transform='scale(1.1)';"
+             onmouseout="this.style.transform='scale(1)';"
+             title="Перейти к документу" />
+      </a>
+    </td>
+    <td style="text-align: left; vertical-align: middle; padding-left: 10px; border: none;">
+      raw_items
+    </td>
+  </tr>
+</table>
+
+
 
 ### Описание полей
 
@@ -105,6 +129,29 @@
     *   Проверка успешного выполнения Airflow DAG.
     *   Проверка создания таблиц и View в Greenplum.
     *   Проверка целостности и корректности данных в Greenplum.
+
+<style>
+.styled-link {
+  color: blue; /* Цвет ссылки по умолчанию */
+  text-decoration: none; /* Убрать подчеркивание по умолчанию */
+}
+
+.styled-link:hover {
+  color: orange; /* Цвет ссылки при наведении */
+  text-decoration: underline; /* Добавить подчеркивание при наведении */
+}
+</style>
+
+## Техническая документация
+
+<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/operators.html#airflow-providers-cncf-kubernetes-operators-sparkkubernetes" class="styled-link">
+airflow.providers.cncf.kubernetes.operators.spark_kubernetes.SparkKubernetesOperator</a> - для отправки Spark задач на кластер
+
+<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/sensors.html#airflow-providers-cncf-kubernetes-sensors-sparkkubernetes" class="styled-link">
+airflow.providers.cncf.kubernetes.sensors.spark_kubernetes.SparkKubernetesSensor</a> - для отслеживания статуса Spark задач
+
+<a href="https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/operators.html#airflow-providers-common-sql-operators-sql-sqlexecutequeryoperator" class="styled-link">
+airflow.providers.common.sql.operators.sql.SQLExecuteQueryOperator</a> - для выполнения запросов к Greenplum
 
 ## Итоговый формат таблиц
 
@@ -179,8 +226,8 @@ def _spark_session():
             .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.2")  # Подключаем AWS SDK для работы с S3
             .config('spark.hadoop.fs.s3a.endpoint', "https://hb.bizmrg.com")  # Endpoint для VK Cloud
             .config('spark.hadoop.fs.s3a.region', "ru-msk")  # Регион VK Cloud
-            .config('spark.hadoop.fs.s3a.access.key', "r7LX3wSCP5ZK1yXupKEVVG")  # Access Key для S3
-            .config('spark.hadoop.fs.s3a.secret.key', "3UnRR8kC8Tvq7vNXibyjW5XxS38dUwvojkKzZWP5p6Uw")  # Secret Key для S3
+            .config('spark.hadoop.fs.s3a.access.key', "XXX")  # Access Key для S3
+            .config('spark.hadoop.fs.s3a.secret.key', "XXXXXX")  # Secret Key для S3
             .getOrCreate()) 
 
 def main():
@@ -190,8 +237,6 @@ def main():
     spark = _spark_session()  # Создаем SparkSession
     item_df = spark.read.parquet(DATA_PATH)  # Читаем данные из S3 в DataFrame
 ```
-
-
 
 ## 1. Количество товаров на которое оформлен возврат 
 
@@ -270,35 +315,62 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-<table>
-  <tr>
-    <td style="padding: 0; text-align: center;">
-      <a href="https://github.com/Vlasov-S-N-96/project/tree/main/startde-project/sergej-vlasov-tnb4478">
-        <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
-             alt="Нажми..."
-             style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
-             onmouseover="this.style.transform='scale(1.1)';"
-             onmouseout="this.style.transform='scale(1)';"
-             title="Перейти к документу" />
-      </a>
-    </td>
-    <td style="padding: 0; text-align: center;">
-      <a href="https://github.com/Vlasov-S-N-96/project/blob/main/startde-project/de-project/sergej-vlasov-tnb4478/items-spark-job.py">
-        <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
-             alt="Нажми..."
-             style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
-             onmouseover="this.style.transform='scale(1.1)';"
-             onmouseout="this.style.transform='scale(1)';"
-             title="Перейти к документу" />
-      </a>
-    </td>
+<div style="display: flex; align-items: center; justify-content: space-between; width: 950px;">
+  <table style="border-collapse: collapse;">
+    <tr>
+      <td style="padding: 0; text-align: center; border: none;">
+        <a href="https://github.com/Vlasov-S-N-96/project/tree/main/startde-project/sergej-vlasov-tnb4478">
+          <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
+               alt="Нажми..."
+               style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
+               onmouseover="this.style.transform='scale(1.1)';"
+               onmouseout="this.style.transform='scale(1)';"
+               title="Перейти к документу" />
+        </a>
+      </td>
+      <td style="text-align: left; vertical-align: middle; padding-left: 10px; border: none;">
+        startde-project
+      </td>
+    </tr>
+  </table>
 
-  </tr>
-  <tr>
-    <td style="text-align: center;">items-spark-job.py</td>
-    <td style="text-align: center;">seller_items</td>
-  </tr>
-</table>
+  <table style="border-collapse: collapse;">
+    <tr>
+      <td style="padding: 0; text-align: center; border: none;">
+        <a href="https://github.com/Vlasov-S-N-96/project/blob/main/startde-project/de-project/sergej-vlasov-tnb4478/items-spark-job.py">
+          <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
+               alt="Нажми..."
+               style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
+               onmouseover="this.style.transform='scale(1.1)';"
+               onmouseout="this.style.transform='scale(1)';"
+               title="Перейти к документу" />
+        </a>
+      </td>
+      <td style="text-align: left; vertical-align: middle; padding-left: 10px; border: none;">
+        items-spark-job.py
+      </td>
+    </tr>
+  </table>
+
+  <table style="border-collapse: collapse;">
+    <tr>
+      <td style="padding: 0; text-align: center; border: none;">
+        <a href="https://github.com/Vlasov-S-N-96/project/blob/main/de-project/sergej-vlasov-tnb4478/items_spark_submit.yaml">
+          <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
+               alt="Нажми..."
+               style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
+               onmouseover="this.style.transform='scale(1.1)';"
+               onmouseout="this.style.transform='scale(1)';"
+               title="Перейти к документу" />
+        </a>
+      </td>
+      <td style="text-align: left; vertical-align: middle; padding-left: 10px; border: none;">
+        items_spark_submit.yaml
+      </td>
+    </tr>
+  </table>
+</div>
+
 
 ## Разработка Airflow DAG 
 
@@ -477,9 +549,31 @@ with DAG(
     # 1. Запускаем Spark приложение
     # 2. Отслеживаем статус Spark приложения
     # 3. Создаем витрину данных в Greenplum
-    submit_task >> sensor_task >> build_datamart
+    # 4. После завершения build_datamart параллельно запускаются:item_brands_view,unreliable_sellers_view
+
+    submit_task >> sensor_task >> build_datamart 
+    build_datamart >> [item_brands_view,unreliable_sellers_view]
 ```
 <details>
   <summary>Показать запуск DAGA</summary>
   <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Airflow/Final_project.jpg" alt="DAG">
 </details>
+
+<table style="border-collapse: collapse;">
+  <tr>
+    <td style="padding: 0; text-align: center; border: none;">
+      <a href="https://github.com/Vlasov-S-N-96/project/blob/main/de-project/sergej-vlasov-tnb4478/startde-project-sergej-vlasov-tnb4478-dag.py">
+        <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
+             alt="Нажми..."
+             style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
+             onmouseover="this.style.transform='scale(1.1)';"
+             onmouseout="this.style.transform='scale(1)';"
+             title="Перейти к документу" />
+      </a>
+    </td>
+    <td style="text-align: left; vertical-align: middle; padding-left: 10px; border: none;">
+      startde-project-sergej-vlasov-tnb4478-dag.py
+    </td>
+  </tr>
+</table>
+
