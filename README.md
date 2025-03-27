@@ -130,12 +130,6 @@
     *   Проверка успешного выполнения Airflow DAG.
     *   Проверка создания таблиц и View в Greenplum.
     *   Проверка целостности и корректности данных в Greenplum.
-
-<details>
-  <summary>Показать Техническая инфраструктуру</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Technical_documentation/teh-doc.png" alt="Техническая инфраструктура">
-</details>
-
 <style>
 .styled-link {
   color: blue; /* Цвет ссылки по умолчанию */
@@ -158,6 +152,11 @@ airflow.providers.cncf.kubernetes.sensors.spark_kubernetes.SparkKubernetesSensor
 
 <a href="https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/operators.html#airflow-providers-common-sql-operators-sql-sqlexecutequeryoperator" class="styled-link">
 airflow.providers.common.sql.operators.sql.SQLExecuteQueryOperator</a> - для выполнения запросов к Greenplum
+
+<details>
+  <summary>Показать Техническую инфраструктуру</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Technical_documentation/teh-doc.png" alt="Техническая инфраструктура">
+</details>
 
 ## Итоговый формат таблиц
 
