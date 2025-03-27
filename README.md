@@ -130,6 +130,11 @@
     *   Проверка создания таблиц и View в Greenplum.
     *   Проверка целостности и корректности данных в Greenplum.
 
+<details>
+  <summary>Показать Техническая инфраструктура</summary>
+  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Technical_documentation/teh-doc.png" alt="Техническая инфраструктура">
+</details>
+
 <style>
 .styled-link {
   color: blue; /* Цвет ссылки по умолчанию */
