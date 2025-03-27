@@ -130,17 +130,6 @@
     *   Проверка успешного выполнения Airflow DAG.
     *   Проверка создания таблиц и View в Greenplum.
     *   Проверка целостности и корректности данных в Greenplum.
-<style>
-.styled-link {
-  color: blue; /* Цвет ссылки по умолчанию */
-  text-decoration: none; /* Убрать подчеркивание по умолчанию */
-}
-
-.styled-link:hover {
-  color: orange; /* Цвет ссылки при наведении */
-  text-decoration: underline; /* Добавить подчеркивание при наведении */
-}
-</style>
 
 ## Техническая документация
 
