@@ -136,7 +136,7 @@
 <a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/operators.html#airflow-providers-cncf-kubernetes-operators-sparkkubernetes" class="styled-link">
 airflow.providers.cncf.kubernetes.operators.spark_kubernetes.SparkKubernetesOperator</a> - для отправки Spark задач на кластер
 
-<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/sensors.html#airflow-providers-cncf-kubernetes-sensors-sparkkubernetes" class="styled-link">
+<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/7.6.0/_api/airflow/providers/cncf/kubernetes/sensors/spark_kubernetes/index.html" class="styled-link">
 airflow.providers.cncf.kubernetes.sensors.spark_kubernetes.SparkKubernetesSensor</a> - для отслеживания статуса Spark задач
 
 <a href="https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/operators.html#airflow-providers-common-sql-operators-sql-sqlexecutequeryoperator" class="styled-link">
