@@ -43,6 +43,7 @@
 ## Исходные данные
 
 Исходные данные размещены в S3 бакете `startde-raw` (VK.Cloud) в формате Parquet. Данные содержат информацию о товарах на маркетплейсе KarpovZone.
+
 <details>
   <summary>Посмотреть исходные данные</summary>
   <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Amazon_s3/Amazon_s3.jpg" alt="startde-raw/raw_items">
@@ -131,7 +132,7 @@
     *   Проверка целостности и корректности данных в Greenplum.
 
 <details>
-  <summary>Показать Техническая инфраструктура</summary>
+  <summary>Показать Техническая инфраструктуру</summary>
   <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Technical_documentation/teh-doc.png" alt="Техническая инфраструктура">
 </details>
 
