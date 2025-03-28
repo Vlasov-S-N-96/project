@@ -625,17 +625,6 @@ with DAG(
   <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Airflow/Final_project.jpg" alt="DAG">
 </details>
 
-<style>
-table {
-  border: none !important;
-  border-collapse: collapse !important;
-}
-
-td {
-  border: none !important;
-}
-</style>
-
 <table style="border-collapse: collapse;">
   <tr>
     <td style="padding: 0; text-align: center; border: none;">
