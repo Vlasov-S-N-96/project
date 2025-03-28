@@ -43,6 +43,11 @@
 ## Исходные данные
 
 Исходные данные размещены в S3 бакете `startde-raw` (VK.Cloud) в формате Parquet. Данные содержат информацию о товарах на маркетплейсе KarpovZone.
+
+## Итоговое расположение и формат
+
+Разместите отчет в формате parquet по пути:s3a://startde-project/{USER_LOGIN}/seller_items
+
 <details>
   <summary>Посмотреть исходные данные</summary>
   <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Amazon_s3/Amazon_s3.jpg" alt="startde-raw/raw_items">
@@ -65,8 +70,6 @@
     </td>
   </tr>
 </table>
-
-
 
 ### Описание полей
 
@@ -118,6 +121,12 @@
         *   Создание View-таблицы `unreliable_sellers_view` в Greenplum, содержащей список ненадежных продавцов.
         *   Создание View-таблицы `item_brands_view` в Greenplum, содержащей отчет по брендам.
     *   Настройка зависимостей между задачами DAG.
+    *   schedule_interval=None (DAG запускается вручную).
+    *   Каждая Spark задача в отдельной таске.
+    *   Все таски выполняются параллельно.
+    *   Таски называются идентично отчетам.
+    *   dag_id имеет формат startde-project-<student_id>-dag.
+    *   Используются соединения kubernetes_karpov и greenplume_karpov.
     *   Обеспечение идемпотентности операций создания таблиц (использование `IF NOT EXISTS`).
 4.  **Разработка SQL-скриптов для Greenplum:**
 
@@ -137,6 +146,9 @@
 <a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/sensors.html#airflow-providers-cncf-kubernetes-sensors-sparkkubernetes" class="styled-link">airflow.providers.cncf.kubernetes.sensors.spark_kubernetes.SparkKubernetesSensor</a><span style="display:inline-block; margin-left: 5px;"> - для отслеживания статуса Spark задач</span>
 
 <a href="https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/operators.html#airflow-providers-common-sql-operators-sql-sqlexecutequeryoperator" class="styled-link">airflow.providers.common.sql.operators.sql.SQLExecuteQueryOperator</a><span style="display:inline-block; margin-left: 5px;"> - для выполнения запросов к Greenplum</span>
+
+<a href="https://github.com/kubeflow/spark-operator/blob/master/README.md" class="styled-
+link">SparkKubernetesOperatorConfiguration</a><span style="display:inline-block; margin-left: 5px;"> - про конфигурирование SparkKubernetesOperator</span>
 
 ## Итоговый формат таблиц
 
