@@ -43,7 +43,6 @@
 ## Исходные данные
 
 Исходные данные размещены в S3 бакете `startde-raw` (VK.Cloud) в формате Parquet. Данные содержат информацию о товарах на маркетплейсе KarpovZone.
-
 <details>
   <summary>Посмотреть исходные данные</summary>
   <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Amazon_s3/Amazon_s3.jpg" alt="startde-raw/raw_items">
@@ -131,21 +130,28 @@
     *   Проверка создания таблиц и View в Greenplum.
     *   Проверка целостности и корректности данных в Greenplum.
 
+<style>
+.styled-link {
+  color: blue; /* Цвет ссылки по умолчанию */
+  text-decoration: none; /* Убрать подчеркивание по умолчанию */
+}
+
+.styled-link:hover {
+  color: orange; /* Цвет ссылки при наведении */
+  text-decoration: underline; /* Добавить подчеркивание при наведении */
+}
+</style>
+
 ## Техническая документация
 
 <a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/operators.html#airflow-providers-cncf-kubernetes-operators-sparkkubernetes" class="styled-link">
 airflow.providers.cncf.kubernetes.operators.spark_kubernetes.SparkKubernetesOperator</a> - для отправки Spark задач на кластер
 
-<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/7.6.0/_api/airflow/providers/cncf/kubernetes/sensors/spark_kubernetes/index.html" class="styled-link">
+<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/sensors.html#airflow-providers-cncf-kubernetes-sensors-sparkkubernetes" class="styled-link">
 airflow.providers.cncf.kubernetes.sensors.spark_kubernetes.SparkKubernetesSensor</a> - для отслеживания статуса Spark задач
 
 <a href="https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/operators.html#airflow-providers-common-sql-operators-sql-sqlexecutequeryoperator" class="styled-link">
 airflow.providers.common.sql.operators.sql.SQLExecuteQueryOperator</a> - для выполнения запросов к Greenplum
-
-<details>
-  <summary>Показать Техническую инфраструктуру</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Technical_documentation/teh-doc.png" alt="Техническая инфраструктура">
-</details>
 
 ## Итоговый формат таблиц
 
@@ -197,6 +203,9 @@ airflow.providers.common.sql.operators.sql.SQLExecuteQueryOperator</a> - для 
 ## Результат
 
 В результате выполнения проекта будет создана витрина данных в Greenplum, содержащая агрегированные метрики по товарам, брендам, категориям и другим параметрам, полезным для анализа эффективности и популярности товаров на маркетплейсе KarpovZone. Аналитики смогут использовать эту витрину для создания отчетов и дашбордов, позволяющих принимать обоснованные решения на основе данных.
+
+
+
 
 ## Разработка Spark Job
 
@@ -309,6 +318,87 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+**Для запуска Spark задачи, оператору требуется указать пути до самой py-spark-job, а так же до конфигурационного файла задачи, где описаны параметры запуска.**
+
+## Конфигурация SparkKubernetesOperator
+
+```Python
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: spark-job-sergej-vlasov-tnb4478-items # имя spark приложения
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: itayb/spark:3.1.1-hadoop-3.2.0-aws
+  imagePullPolicy: Always
+  mainApplicationFile: "local:///de-project/dags/sergej-vlasov-tnb4478/items-spark-job.py" # путь к Spark файлу
+  sparkVersion: "3.1.1"
+  timeToLiveSeconds: 40
+  restartPolicy:
+    type: Never
+  volumes:
+    - name: git-repo
+      emptyDir:
+        sizeLimit: 500Mi
+    - name: ssh-key
+      secret:
+        secretName: ssh-key
+        defaultMode: 256
+  driver:
+    tolerations:
+      - key: k8s.karpov.courses/custom-11-12
+        operator: Equal
+        effect: NoSchedule
+        value: 'true'
+      - key: k8s.karpov.courses/custom-spark
+        operator: Equal
+        effect: NoSchedule
+        value: 'true'
+    volumeMounts:
+      - name: "git-repo"
+        mountPath: /de-project
+      - name: ssh-key
+        mountPath: /tmp/ssh
+    initContainers:
+      - name: git-clone
+        image: alpine/git:2.40.1
+        env:
+          - name: GIT_SSH_COMMAND
+            value: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+        command: ['sh', '-c', 'git clone --depth=1 --single-branch git@git.lab.karpov.courses:de/de-project.git /de-project']
+        volumeMounts:
+          - name: git-repo
+            mountPath: /de-project
+          - name: ssh-key
+            mountPath: /root/.ssh
+    cores: 1
+    coreLimit: "1200m"
+    memory: "1024m"
+    labels:
+      version: 3.1.1
+    serviceAccount: spark-driver
+  executor:
+    tolerations:
+      - key: k8s.karpov.courses/custom-11-12
+        operator: Equal
+        effect: NoSchedule
+        value: 'true'
+      - key: k8s.karpov.courses/custom-spark
+        operator: Equal
+        effect: NoSchedule
+        value: 'true'
+    cores: 1
+    coreLimit: "2500m"
+    instances: 1
+    memory: "2048m"
+    labels:
+      version: 3.1.1
+
+```
+
 <div style="display: flex; align-items: center; justify-content: space-between; width: 950px;">
   <table style="border-collapse: collapse;">
     <tr>
@@ -552,6 +642,17 @@ with DAG(
   <summary>Показать запуск DAGA</summary>
   <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Airflow/Final_project.jpg" alt="DAG">
 </details>
+
+<style>
+table {
+  border: none !important;
+  border-collapse: collapse !important;
+}
+
+td {
+  border: none !important;
+}
+</style>
 
 <table style="border-collapse: collapse;">
   <tr>
