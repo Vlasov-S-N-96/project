@@ -130,28 +130,13 @@
     *   Проверка создания таблиц и View в Greenplum.
     *   Проверка целостности и корректности данных в Greenplum.
 
-<style>
-.styled-link {
-  color: blue; /* Цвет ссылки по умолчанию */
-  text-decoration: none; /* Убрать подчеркивание по умолчанию */
-}
-
-.styled-link:hover {
-  color: orange; /* Цвет ссылки при наведении */
-  text-decoration: underline; /* Добавить подчеркивание при наведении */
-}
-</style>
-
 ## Техническая документация
 
-<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/operators.html#airflow-providers-cncf-kubernetes-operators-sparkkubernetes" class="styled-link">
-airflow.providers.cncf.kubernetes.operators.spark_kubernetes.SparkKubernetesOperator</a> - для отправки Spark задач на кластер
+<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/operators.html#airflow-providers-cncf-kubernetes-operators-sparkkubernetes" class="styled-link">airflow.providers.cncf.kubernetes.operators.spark_kubernetes.SparkKubernetesOperator</a><span style="display:inline-block; margin-left: 5px;"> - для отправки Spark задач на кластер</span>
 
-<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/sensors.html#airflow-providers-cncf-kubernetes-sensors-sparkkubernetes" class="styled-link">
-airflow.providers.cncf.kubernetes.sensors.spark_kubernetes.SparkKubernetesSensor</a> - для отслеживания статуса Spark задач
+<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/sensors.html#airflow-providers-cncf-kubernetes-sensors-sparkkubernetes" class="styled-link">airflow.providers.cncf.kubernetes.sensors.spark_kubernetes.SparkKubernetesSensor</a><span style="display:inline-block; margin-left: 5px;"> - для отслеживания статуса Spark задач</span>
 
-<a href="https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/operators.html#airflow-providers-common-sql-operators-sql-sqlexecutequeryoperator" class="styled-link">
-airflow.providers.common.sql.operators.sql.SQLExecuteQueryOperator</a> - для выполнения запросов к Greenplum
+<a href="https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/operators.html#airflow-providers-common-sql-operators-sql-sqlexecutequeryoperator" class="styled-link">airflow.providers.common.sql.operators.sql.SQLExecuteQueryOperator</a><span style="display:inline-block; margin-left: 5px;"> - для выполнения запросов к Greenplum</span>
 
 ## Итоговый формат таблиц
 
@@ -203,9 +188,6 @@ airflow.providers.common.sql.operators.sql.SQLExecuteQueryOperator</a> - для 
 ## Результат
 
 В результате выполнения проекта будет создана витрина данных в Greenplum, содержащая агрегированные метрики по товарам, брендам, категориям и другим параметрам, полезным для анализа эффективности и популярности товаров на маркетплейсе KarpovZone. Аналитики смогут использовать эту витрину для создания отчетов и дашбордов, позволяющих принимать обоснованные решения на основе данных.
-
-
-
 
 ## Разработка Spark Job
 
@@ -477,7 +459,7 @@ SUBMIT_NAME = "job_submit"  # task_id для SparkKubernetesOperator
 SENSOR_NAME = "job_sensor"  # task_id для SparkKubernetesSensor
 ```
 
-# SQL-запрос для создания витрины данных в Greenplum 
+# SQL-запросы для создания витрины данных в Greenplum 
 ```Sql
 items_datamart_query = """DROP EXTERNAL TABLE IF EXISTS "sergej-vlasov-tnb4478".seller_items CASCADE;
                     CREATE EXTERNAL TABLE "sergej-vlasov-tnb4478".seller_items (
