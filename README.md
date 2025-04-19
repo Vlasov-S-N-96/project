@@ -38,33 +38,6 @@
 
 Исходные данные размещены в S3 бакете `startde-raw` (VK.Cloud) в формате Parquet. Данные содержат информацию о товарах на маркетплейсе KarpovZone.
 
-## Итоговое расположение и формат
-
-Отчет размещен в формате parquet по пути:s3a://startde-project/{USER_LOGIN}/seller_items
-
-<details>
-  <summary>Посмотреть исходные данные</summary>
-  <img src="https://github.com/Vlasov-S-N-96/project/blob/main/Amazon_s3/Amazon_s3.jpg" alt="startde-raw/raw_items">
-</details>
-
-<table style="border-collapse: collapse;">
-  <tr>
-    <td style="padding: 0; text-align: center; border: none;">
-      <a href="https://github.com/Vlasov-S-N-96/project/tree/main/startde-raw/raw_items">
-        <img src="https://raw.githubusercontent.com/Vlasov-S-N-96/project/main/icons/document.svg"
-             alt="Нажми..."
-             style="width: 50px; height: auto; transition: transform 0.2s ease-in-out; cursor: pointer;"
-             onmouseover="this.style.transform='scale(1.1)';"
-             onmouseout="this.style.transform='scale(1)';"
-             title="Перейти к документу" />
-      </a>
-    </td>
-    <td style="text-align: left; vertical-align: middle; padding-left: 10px; border: none;">
-      raw_items
-    </td>
-  </tr>
-</table>
-
 ### Описание полей
 
 | Поле                       | Тип      | Описание                                                                                                                                     |
@@ -85,54 +58,6 @@
 | `days_on_sell`             | `bigint` | Количество дней с момента размещения товара на платформе.                                                                                    |
 | `avg_percent_to_sold`      | `bigint` | Средний процент выкупа товара (отношение количества проданных единиц к общему количеству заказов).                                            |
 
-## Задачи
-
-1.  **Настройка окружения:**
-
-    *   Установка и настройка необходимых инструментов:
-        *   Apache Airflow
-        *   Apache Spark
-        *   Greenplum
-        *   Python (с библиотеками pandas, PySpark)
-    *   Получение доступа к S3 хранилищу `startde-raw` (VK.Cloud).
-    *   Настройка подключения к Greenplum хранилищу.
-2.  **Разработка Spark Job :**
-
-    *   Чтение данных о товарах из S3 бакета `startde-raw/raw_items` в формате Parquet.
-    *   Обогащение данных дополнительными параметрами и агрегатами:
-        *   `returned_items_count` (количество товаров на которое оформлен возврат).
-        *   `potential_revenue` (потенциальный доход от остатков товаров).
-        *   `total_revenue` (доход от выполненных заказов с учетом возвратов).
-        *   `avg_daily_sales` (среднее количество продаж с момента запуска).
-        *   `days_to_sold` (количество дней которое потребуется для продажи всех доступных остатков товара).
-        *   `item_rate_percent` (относительный ранг рейтинга товара).
-    *   Сохранение результата в формате Parquet в S3 бакет `startde-project/{USER_LOGIN}/seller_items`.
-3.  **Разработка Airflow DAG :**
-
-    *   Создание DAG, который выполняет следующие задачи:
-        *   Запуск Spark Job (используя `SparkKubernetesOperator`).
-        *   Создание внешней таблицы `seller_items` в Greenplum (используя `SQLExecuteQueryOperator` и Greenplum PXF).
-        *   Создание View-таблицы `unreliable_sellers_view` в Greenplum, содержащей список ненадежных продавцов.
-        *   Создание View-таблицы `item_brands_view` в Greenplum, содержащей отчет по брендам.
-    *   Настройка зависимостей между задачами DAG.
-    *   schedule_interval=None (DAG запускается вручную).
-    *   Каждая Spark задача в отдельной таске.
-    *   Все таски выполняются параллельно.
-    *   Таски называются идентично отчетам.
-    *   dag_id имеет формат startde-project-<student_id>-dag.
-    *   Используются соединения kubernetes_karpov и greenplume_karpov.
-    *   Обеспечение идемпотентности операций создания таблиц (использование `IF NOT EXISTS`).
-4.  **Разработка SQL-скриптов для Greenplum:**
-
-    *   Создание SQL-скриптов для создания внешней таблицы `seller_items` на основе данных в S3.
-    *   Создание SQL-скриптов для создания View-таблицы `unreliable_sellers_view` (на основе таблицы `seller_items`).
-    *   Создание SQL-скриптов для создания View-таблицы `item_brands_view` (на основе таблицы `seller_items`).
-5.  **Тестирование и проверка:**
-
-    *   Проверка успешного выполнения Airflow DAG.
-    *   Проверка создания таблиц и View в Greenplum.
-    *   Проверка целостности и корректности данных в Greenplum.
-
 ## Техническая документация
 
 <a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/operators.html#airflow-providers-cncf-kubernetes-operators-sparkkubernetes" class="styled-link">airflow.providers.cncf.kubernetes.operators.spark_kubernetes.SparkKubernetesOperator</a><span style="display:inline-block; margin-left: 5px;"> - для отправки Spark задач на кластер</span>
@@ -144,56 +69,57 @@
 <a href="https://github.com/kubeflow/spark-operator/blob/master/README.md" class="styled-
 link">SparkKubernetesOperatorConfiguration</a><span style="display:inline-block; margin-left: 5px;"> - про конфигурирование SparkKubernetesOperator</span>
 
-## Итоговый формат таблиц
-
-### Таблица: seller_items
-
-| Поле                       | Тип (GP)       | Описание                                                                                                 |
-| -------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
-| `sku_id`                   | `BIGINT`       | Уникальный идентификатор товара (Stock Keeping Unit).                                                  |
-| `title`                    | `TEXT`         | Название товара, указанное продавцом.                                                                   |
-| `category`                 | `TEXT`         | Категория товара, к которой он относится.                                                                |
-| `brand`                    | `TEXT`         | Название бренда, производящего товар.                                                                   |
-| `seller`                   | `TEXT`         | Название или идентификатор продавца.                                                                     |
-| `group_type`               | `TEXT`         | Группа товара, к которой он относится.                                                                 |
-| `country`                  | `TEXT`         | Страна производства товара.                                                                            |
-| `availability_items_count` | `BIGINT`       | Текущее количество товара в наличии на складах.                                                           |
-| `ordered_items_count`      | `BIGINT`       | Общее количество товара, которое было заказано.                                                           |
-| `warehouses_count`         | `BIGINT`       | Количество складов, на которых размещен товар.                                                            |
-| `item_price`               | `BIGINT`       | Текущая цена товара.                                                                                     |
-| `goods_sold_count`         | `BIGINT`       | Количество проданных единиц товара за определенный период.                                                  |
-| `item_rate`                | `FLOAT8`       | Рейтинг товара, рассчитанный на основе отзывов пользователей.                                                    |
-| `days_on_sell`             | `BIGINT`       | Количество дней, прошедших с момента размещения товара на платформе.                                                    |
-| `avg_percent_to_sold`      | `BIGINT`       | Средний процент выкупа товара.                                                                             |
-| `returned_items_count`     | `INTEGER`      | Количество товаров на которое оформлен возврат.                                                              |
-| `potential_revenue`        | `BIGINT`       | Потенциальный доход от остатков товаров.                                                                   |
-| `total_revenue`            | `BIGINT`       | Доход от выполненных заказов с учетом возвратов.                                                            |
-| `avg_daily_sales`          | `FLOAT8`       | Среднее количество продаж с момента запуска.                                                               |
-| `days_to_sold`             | `FLOAT8`       | Количество дней, которое потребуется для продажи всех доступных остатков товара.                               |
-| `item_rate_percent`        | `FLOAT8`       | Относительный ранг (т. е. процентиль).                                                                     |
-
-### View: unreliable_sellers_view
-
-| Поле                          | Тип      | Описание                                                                                                                                                                                              |
-| ----------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `seller`                      | `TEXT`   | Информация о продавце.                                                                                                                                                                               |
-| `total_overload_items_count`  | `BIGINT` | Количество товаров на складах (для ненадежных продавцов).                                                                                                                                             |
-| `is_unreliable`               | `BOOLEAN`| Признак НЕ надежности.                                                                                                                                                                                  |
-
-### View: item_brands_view
-
-| Поле               | Тип (GP) | Описание                                            |
-| ------------------ | -------- | --------------------------------------------------- |
-| `brand`            | `TEXT`   | Имя бренда.                                        |
-| `group_type`       | `TEXT`   | Группа товаров.                                   |
-| `country`          | `TEXT`   | Страна производства.                                |
-| `potential_revenue`| `FLOAT8` | Суммарный итоговый потенциальный доход.            |
-| `total_revenue`    | `FLOAT8` | Суммарный итоговый доход.                           |
-| `items_count`      | `BIGINT` | Количество позиций бренда (количество товаров).      |
-
 ## Результат
 
 В результате выполнения проекта будет создана витрина данных в Greenplum, содержащая агрегированные метрики по товарам, брендам, категориям и другим параметрам, полезным для анализа эффективности и популярности товаров на маркетплейсе KarpovZone. Аналитики смогут использовать эту витрину для создания отчетов и дашбордов, позволяющих принимать обоснованные решения на основе данных.
+
+## Этапы работы
+
+1.  **Настройка окружения:**
+
+    *   Установка и настройка:
+        *   Apache Airflow
+        *   Apache Spark
+        *   Greenplum
+        *   Python (с библиотеками pandas, PySpark)
+    *   Подключение к хранилищу S3 startde-raw (VK.Cloud) и Greenplum.
+2.  **Разработка Spark Job :**
+
+    *   Чтение данных о товарах из S3 бакета `startde-raw/raw_items` в формате Parquet.
+    *   Обогащение данных:
+        * Расчет агрегатов:
+           *   `returned_items_count` (количество товаров на которое оформлен возврат).
+           *   `potential_revenue` (потенциальный доход от остатков товаров).
+           *   `total_revenue` (доход от выполненных заказов с учетом возвратов).
+           *   `avg_daily_sales` (среднее количество продаж с момента запуска).
+           *   `days_to_sold` (количество дней которое потребуется для продажи всех доступных остатков товара).
+           *   `item_rate_percent` (относительный ранг рейтинга товара).
+    *   Сохранение результата в формате Parquet в S3 `startde-project/{USER_LOGIN}/seller_items`.
+3.  **Разработка Airflow DAG :**
+
+    *   DAG выполняет:
+        *   Запуск Spark Job (`SparkKubernetesOperator`).
+        *   Создание внешней таблицы `seller_items` в Greenplum (`SQLExecuteQueryOperator`, Greenplum PXF).
+        *   Создание View `unreliable_sellers_view` в Greenplum (список ненадежных продавцов).
+        *   Создание View `item_brands_view` в Greenplum (отчет по брендам).
+    *   Настройка зависимостей.
+    *   schedule_interval=None (ручной запуск).
+    *   Каждая Spark задача - отдельная таска.
+    *   Параллельное выполнение тасок.
+    *   Идентичные названия тасок и отчетов.
+    *   dag_id имеет формат startde-project-<student_id>-dag.
+    *   Используются соединения kubernetes_karpov и greenplume_karpov.
+    *   Обеспечение идемпотентности (использование `IF NOT EXISTS`).
+4.  **Разработка SQL-скриптов для Greenplum:**
+
+    *   Создание внешней таблицы `seller_items` на основе данных в S3.
+    *   Создание View `unreliable_sellers_view` (на основе таблицы `seller_items`).
+    *   Создание View `item_brands_view` (на основе таблицы `seller_items`).
+5.  **Тестирование и проверка:**
+
+    *   Проверка успешного выполнения Airflow DAG.
+    *   Проверка создания таблиц и View в Greenplum.
+    *   Проверка целостности и корректности данных.
 
 ## Разработка Spark Job
 
