@@ -1,13 +1,13 @@
-# Витрина Данных для Аналитиков KarpovZone
+# Витрина Данных для Аналитиков
 
 ## Цель проекта
 
-Предоставить аналитикам агрегированные метрики по карточкам товаром, популярным категориям и прочим параметрам на маркетплейсе KarpovZone. Цель также заключается в демонстрации совместной работы DWH (Greenplum), Data Lake (Spark) и Data Orchestrator (Airflow).
+Предоставить аналитикам агрегированные метрики по карточкам товаром, популярным категориям и прочим параметрам на маркетплейсе. Цель также заключается в демонстрации совместной работы DWH (Greenplum), Data Lake (Spark) и Data Orchestrator (Airflow).
 
 ## Цель создания витрины данных
-Создание инструментов для упрощения аналитики данных по товарам представленным на площадке KarpovZone.
+Создание инструментов для упрощения аналитики данных по товарам.
 
-## Архитектура решения
+## Этапы работы
 
 1.  **Data Lake (Spark):**
     *   Чтение исходных данных в формате Parquet из S3 бакета `startde-raw` (VK.Cloud).
@@ -22,23 +22,23 @@
     *   Загрузка агрегированных данных из промежуточного Parquet формата.
     *   Предоставление аналитикам доступа к витрине данных для выполнения запросов и построения отчетов.
 
-## Технологии
+<details>
+<summary>Технологии</summary>
 
-*   **Python:**  Для разработки Spark-приложения и Airflow DAG.
-    *   **Pandas:**  Для локальной обработки данных (например, при тестировании).
-    *   **PySpark:**  Для обработки больших объемов данных в Spark.
-*   **SQL:**  Для работы с Greenplum и запросов к данным.
-*   **Apache Spark:**  Для обработки и агрегации данных в Data Lake.
-*   **Apache Airflow:**  Для оркестрации ETL-процессов.
-*   **Greenplum:**  В качестве хранилища данных (DWH).
-*   **AWS S3 :**  Для хранения исходных и промежуточных данных.
-*   **Git/GitHub:** 
+- **Python**: Для разработки Spark-приложения и Airflow DAG.
+- **Pandas**: Для локальной обработки данных (например, при тестировании).
+- **PySpark**: Для обработки больших объемов данных в Spark.
+- **SQL**: Для работы с Greenplum и запросов к данным.
+- **Apache Spark**: Для обработки и агрегации данных в Data Lake.
+- **Apache Airflow**: Для оркестрации ETL-процессов.
+- **Greenplum**: В качестве хранилища данных (DWH).
+- **AWS S3**: Для хранения исходных и промежуточных данных.
+- **Git/GitHub**: Для управления версиями кода и совместной работы.
 
-## Исходные данные
+</details>
 
-Исходные данные размещены в S3 бакете `startde-raw` (VK.Cloud) в формате Parquet. Данные содержат информацию о товарах на маркетплейсе KarpovZone.
-
-### Описание полей
+<details>
+<summary>Описание полей исходных данных</summary>
 
 | Поле                       | Тип      | Описание                                                                                                                                     |
 | -------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -58,22 +58,8 @@
 | `days_on_sell`             | `bigint` | Количество дней с момента размещения товара на платформе.                                                                                    |
 | `avg_percent_to_sold`      | `bigint` | Средний процент выкупа товара (отношение количества проданных единиц к общему количеству заказов).                                            |
 
-## Техническая документация
 
-<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/operators.html#airflow-providers-cncf-kubernetes-operators-sparkkubernetes" class="styled-link">airflow.providers.cncf.kubernetes.operators.spark_kubernetes.SparkKubernetesOperator</a><span style="display:inline-block; margin-left: 5px;"> - для отправки Spark задач на кластер</span>
-
-<a href="https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/sensors.html#airflow-providers-cncf-kubernetes-sensors-sparkkubernetes" class="styled-link">airflow.providers.cncf.kubernetes.sensors.spark_kubernetes.SparkKubernetesSensor</a><span style="display:inline-block; margin-left: 5px;"> - для отслеживания статуса Spark задач</span>
-
-<a href="https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/operators.html#airflow-providers-common-sql-operators-sql-sqlexecutequeryoperator" class="styled-link">airflow.providers.common.sql.operators.sql.SQLExecuteQueryOperator</a><span style="display:inline-block; margin-left: 5px;"> - для выполнения запросов к Greenplum</span>
-
-<a href="https://github.com/kubeflow/spark-operator/blob/master/README.md" class="styled-
-link">SparkKubernetesOperatorConfiguration</a><span style="display:inline-block; margin-left: 5px;"> - про конфигурирование SparkKubernetesOperator</span>
-
-## Результат
-
-В результате выполнения проекта будет создана витрина данных в Greenplum, содержащая агрегированные метрики по товарам, брендам, категориям и другим параметрам, полезным для анализа эффективности и популярности товаров на маркетплейсе KarpovZone. Аналитики смогут использовать эту витрину для создания отчетов и дашбордов, позволяющих принимать обоснованные решения на основе данных.
-
-## Этапы работы
+</details>
 
 1.  **Настройка окружения:**
 
@@ -235,7 +221,8 @@ if __name__ == "__main__":
 
 **Для запуска Spark задачи, оператору требуется указать пути до самой py-spark-job, а так же до конфигурационного файла задачи, где описаны параметры запуска.**
 
-## Конфигурация SparkKubernetesOperator
+<details>
+<summary>Конфигурация SparkKubernetesOperator</summary>
 
 ```Python
 apiVersion: sparkoperator.k8s.io/v1beta2
@@ -312,6 +299,8 @@ spec:
       version: 3.1.1
 
 ```
+
+</details>
 
 <div style="display: flex; align-items: center; justify-content: space-between; width: 950px;">
   <table style="border-collapse: collapse;">
@@ -574,3 +563,16 @@ with DAG(
     </td>
   </tr>
 </table>
+
+## Результат
+
+В результате выполнения проекта будет создана витрина данных в Greenplum, содержащая агрегированные метрики по товарам, брендам, категориям и другим параметрам, полезным для анализа эффективности и популярности товаров. Аналитики смогут использовать эту витрину для создания отчетов и дашбордов, позволяющих принимать обоснованные решения на основе данных.
+
+<details> <summary>Техническая документация</summary>
+
+- [SparkKubernetesOperator](https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/operators.html#airflow-providers-cncf-kubernetes-operators-sparkkubernetes) - для отправки Spark задач на кластер
+- [SparkKubernetesSensor](https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/sensors.html#airflow-providers-cncf-kubernetes-sensors-sparkkubernetes) - для отслеживания статуса Spark задач
+- [SQLExecuteQueryOperator](https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/operators.html#airflow-providers-common-sql-operators-sql-sqlexecutequeryoperator) - для выполнения запросов к Greenplum
+- [SparkKubernetesOperatorConfiguration](https://github.com/kubeflow/spark-operator/blob/master/README.md) - про конфигурирование SparkKubernetesOperator
+</details>
+
